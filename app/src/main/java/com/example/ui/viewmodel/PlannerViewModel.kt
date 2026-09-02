@@ -343,6 +343,7 @@ class PlannerViewModel(application: Application) : AndroidViewModel(application)
         dueTime: String? = null,
         durationMinutes: Int = 30,
         isStarred: Boolean = false,
+        isCompleted: Boolean = false,
         reminderEnabled: Boolean = false,
         recurrence: String = "NONE",
         subtasks: List<SubTask> = emptyList(),
@@ -360,6 +361,8 @@ class PlannerViewModel(application: Application) : AndroidViewModel(application)
                 dueTime = dueTime,
                 durationMinutes = durationMinutes,
                 isStarred = isStarred,
+                isCompleted = isCompleted,
+                completedAt = if (isCompleted) System.currentTimeMillis() else null,
                 reminderEnabled = reminderEnabled,
                 recurrence = recurrence,
                 sticker = sticker
@@ -371,6 +374,22 @@ class PlannerViewModel(application: Application) : AndroidViewModel(application)
                 scheduleReminderForTask(newId, title, category, dueDate, dueTime)
             }
         }
+    }
+
+    fun setTaskCompletion(task: TaskItem, isCompleted: Boolean) {
+        viewModelScope.launch {
+            repository.updateTask(
+                task.copy(
+                    isCompleted = isCompleted,
+                    completedAt = if (isCompleted) System.currentTimeMillis() else null
+                )
+            )
+        }
+    }
+
+    fun muteAlarmSound() {
+        NotificationUtils.stopAlarmSound()
+        _aiMessage.value = "🔕 Alarm sound muted"
     }
 
     fun updateTask(task: TaskItem) {

@@ -263,7 +263,7 @@ fun TasksScreen(
                     showAddDialog = false
                     taskToEdit = null
                 },
-                onSaveTask = { title, desc, cat, priority, dueDate, dueTime, duration, isStarred, reminder, recurrence, subtasks, sticker ->
+                onSaveTask = { title, desc, cat, priority, dueDate, dueTime, duration, isStarred, reminder, recurrence, subtasks, sticker, isCompleted ->
                     if (taskToEdit == null) {
                         viewModel.addTask(
                             title = title,
@@ -274,6 +274,7 @@ fun TasksScreen(
                             dueTime = dueTime,
                             durationMinutes = duration,
                             isStarred = isStarred,
+                            isCompleted = isCompleted,
                             reminderEnabled = reminder,
                             recurrence = recurrence,
                             subtasks = subtasks,
@@ -290,6 +291,8 @@ fun TasksScreen(
                                 dueTime = dueTime,
                                 durationMinutes = duration,
                                 isStarred = isStarred,
+                                isCompleted = isCompleted,
+                                completedAt = if (isCompleted) System.currentTimeMillis() else null,
                                 reminderEnabled = reminder,
                                 recurrence = recurrence,
                                 sticker = sticker

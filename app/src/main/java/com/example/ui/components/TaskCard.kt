@@ -20,11 +20,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Alarm
 import androidx.compose.material.icons.outlined.StarOutline
@@ -169,7 +171,7 @@ fun TaskCard(
                         )
                     }
 
-                    // Chips row (category, priority, time)
+                    // Chips row (category, priority, status, time)
                     Row(
                         modifier = Modifier.padding(top = 6.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -185,6 +187,21 @@ fun TaskCard(
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = Color(catColorHex),
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+
+                        // Status Pill (Complete / Incomplete)
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = if (task.isCompleted) Color(0xFF10B981).copy(alpha = 0.15f) else Color(0xFFF59E0B).copy(alpha = 0.15f),
+                            modifier = Modifier.clickable { onToggleComplete() }
+                        ) {
+                            Text(
+                                text = if (task.isCompleted) "✓ Done" else "○ Pending",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = if (task.isCompleted) Color(0xFF10B981) else Color(0xFFD97706),
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                             )
                         }
@@ -258,6 +275,20 @@ fun TaskCard(
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false }
                     ) {
+                        DropdownMenuItem(
+                            text = { Text(if (task.isCompleted) "Mark as Incomplete (Pending) ○" else "Mark as Complete ✓") },
+                            onClick = {
+                                showMenu = false
+                                onToggleComplete()
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = if (task.isCompleted) Icons.Default.RadioButtonUnchecked else Icons.Default.CheckCircle,
+                                    contentDescription = null,
+                                    tint = if (task.isCompleted) Color(0xFFD97706) else Color(0xFF10B981)
+                                )
+                            }
+                        )
                         DropdownMenuItem(
                             text = { Text("AI Smart Breakdown 🤖") },
                             onClick = {

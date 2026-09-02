@@ -90,7 +90,8 @@ fun AddTaskBottomSheet(
         reminder: Boolean,
         recurrence: String,
         subtasks: List<SubTask>,
-        sticker: String
+        sticker: String,
+        isCompleted: Boolean
     ) -> Unit
 ) {
     val context = LocalContext.current
@@ -120,6 +121,7 @@ fun AddTaskBottomSheet(
     var dueTime by remember { mutableStateOf(initialTask?.dueTime ?: initialTime ?: "06:00") }
     var durationMinutes by remember { mutableIntStateOf(initialTask?.durationMinutes ?: 30) }
     var isStarred by remember { mutableStateOf(initialTask?.isStarred ?: false) }
+    var isCompleted by remember { mutableStateOf(initialTask?.isCompleted ?: false) }
     var reminderEnabled by remember { mutableStateOf(initialTask?.reminderEnabled ?: false) }
     var recurrence by remember { mutableStateOf(initialTask?.recurrence ?: "NONE") }
     var selectedSticker by remember { mutableStateOf(initialTask?.sticker ?: "⭐️") }
@@ -408,6 +410,29 @@ fun AddTaskBottomSheet(
                 }
             }
 
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // Task Status Selector: Complete or Not
+            Text("Task Status", fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FilterChip(
+                    selected = !isCompleted,
+                    onClick = { isCompleted = false },
+                    label = { Text("○ Incomplete (Pending)") },
+                    modifier = Modifier.weight(1f)
+                )
+                FilterChip(
+                    selected = isCompleted,
+                    onClick = { isCompleted = true },
+                    label = { Text("✓ Completed") },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             // Aesthetic Sticker
@@ -481,7 +506,8 @@ fun AddTaskBottomSheet(
                             reminderEnabled,
                             recurrence,
                             subtasksList.toList(),
-                            selectedSticker
+                            selectedSticker,
+                            isCompleted
                         )
                         onDismiss()
                     }

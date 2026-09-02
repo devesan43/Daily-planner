@@ -6,6 +6,8 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
@@ -31,12 +33,26 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ui.screens.AlarmAlertActivity"
+            android:exported="false"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:excludeFromRecents="true"
+            android:theme="@style/Theme.MyApplication" />
+
         <receiver
             android:name=".receiver.TaskReminderReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.aistudio.todolist.ACTION_REMINDER" />
                 <action android:name="com.aistudio.todolist.ACTION_SLEEP_ALARM" />
+                <action android:name="com.aistudio.todolist.ACTION_MUTE_ALARM" />
+                <action android:name="com.aistudio.todolist.ACTION_STOP_ALARM" />
+                <action android:name="com.aistudio.todolist.ACTION_SNOOZE_TASK" />
+                <action android:name="com.aistudio.todolist.ACTION_SNOOZE_SLEEP" />
+                <action android:name="com.aistudio.todolist.ACTION_COMPLETE_TASK" />
+                <action android:name="com.aistudio.todolist.ACTION_INCOMPLETE_TASK" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>

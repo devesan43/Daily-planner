@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -40,6 +41,7 @@ import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -61,15 +63,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.AppTheme
+import com.example.receiver.NotificationUtils
 import com.example.ui.viewmodel.PlannerViewModel
 
 @Composable
 fun MineScreen(viewModel: PlannerViewModel) {
+    val context = LocalContext.current
     val allTasks by viewModel.allTasks.collectAsState()
     val habits by viewModel.allHabits.collectAsState()
     val currentTheme by viewModel.currentTheme.collectAsState()
@@ -414,6 +419,37 @@ fun MineScreen(viewModel: PlannerViewModel) {
                         Text("Wake-up Alarm", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text(sleepSettings.targetWakeTime, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
                         Text(if (sleepSettings.wakeAlarmEnabled) "⏰ Alarm Active (${if (sleepSettings.soundAlarmEnabled) "Sound" else "Silent"})" else "Alarm Off", fontSize = 11.sp)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = {
+                            NotificationUtils.showSleepAlarmNotification(context, true)
+                        },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Text("Test Alarm ⏰", fontSize = 11.sp)
+                    }
+
+                    Button(
+                        onClick = {
+                            NotificationUtils.stopAlarmSound()
+                            Toast.makeText(context, "Alarm sound muted 🔕", Toast.LENGTH_SHORT).show()
+                        },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondary
+                        )
+                    ) {
+                        Text("Mute Sound 🔕", fontSize = 11.sp)
                     }
                 }
             }

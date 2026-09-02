@@ -388,7 +388,7 @@ fun CalendarScreen(
             initialTime = prefilledTime,
             availableCategories = categories,
             onDismiss = { showAddTaskDialog = false },
-            onSaveTask = { title, desc, cat, priority, dueDate, dueTime, duration, isStarred, reminder, recurrence, subtasks, sticker ->
+            onSaveTask = { title, desc, cat, priority, dueDate, dueTime, duration, isStarred, reminder, recurrence, subtasks, sticker, isCompleted ->
                 viewModel.addTask(
                     title = title,
                     description = desc,
@@ -398,6 +398,7 @@ fun CalendarScreen(
                     dueTime = dueTime ?: prefilledTime,
                     durationMinutes = duration,
                     isStarred = isStarred,
+                    isCompleted = isCompleted,
                     reminderEnabled = reminder,
                     recurrence = recurrence,
                     subtasks = subtasks,
