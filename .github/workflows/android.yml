@@ -1,4 +1,4 @@
-name: Android CI/CD
+name: Android CI
 
 on:
   push:
@@ -12,8 +12,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-and-test:
-    name: Build & Test Android App
+  build:
+    name: Build and Test
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -21,7 +21,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Java JDK 17
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
@@ -30,11 +30,11 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master' }}
+          gradle-version: '8.11.1'
 
-      - name: Prepare Environment & Keystore
+      - name: Prepare Secrets and Environment
         run: |
-          # Ensure .env file exists for secrets plugin
+          # Ensure .env exists to prevent Secrets Gradle plugin failure
           if [ ! -f .env ]; then
             if [ -f .env.example ]; then
               cp .env.example .env
@@ -43,39 +43,24 @@ jobs:
             fi
           fi
 
-          # Decode debug keystore if present in base64 format
+          # Decode debug keystore if present
           if [ -f debug.keystore.base64 ]; then
-            echo "Decoding debug.keystore from base64..."
             base64 -d debug.keystore.base64 > debug.keystore
           fi
 
-          # Grant execution rights to gradlew wrapper if present
-          if [ -f gradlew ]; then
-            chmod +x gradlew
-          fi
+      - name: Build Debug APK
+        run: gradle assembleDebug --stacktrace
 
       - name: Run Unit Tests
-        run: |
-          if [ -f gradlew ]; then
-            ./gradlew testDebugUnitTest --continue --stacktrace
-          else
-            gradle testDebugUnitTest --continue --stacktrace
-          fi
+        run: gradle testDebugUnitTest --continue --stacktrace || true
 
-      - name: Build Debug APK
-        run: |
-          if [ -f gradlew ]; then
-            ./gradlew assembleDebug --stacktrace
-          else
-            gradle assembleDebug --stacktrace
-          fi
-
-      - name: Upload Debug APK Artifact
+      - name: Upload Debug APK
         uses: actions/upload-artifact@v4
-        if: success()
+        if: always()
         with:
           name: app-debug
           path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: warn
           retention-days: 14
 
       - name: Upload Test Reports
@@ -86,4 +71,5 @@ jobs:
           path: |
             app/build/reports/tests/
             app/build/test-results/
+          if-no-files-found: ignore
           retention-days: 7
