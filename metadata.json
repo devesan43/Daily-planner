@@ -1,0 +1,6 @@
+{
+  "name": "To-Do List",
+  "description": "Daily schedule planner, task organizer, to do reminder app & calendar with AI planning and ADHD focus tools",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
