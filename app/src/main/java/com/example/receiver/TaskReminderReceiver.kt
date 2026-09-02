@@ -6,10 +6,16 @@ import android.content.Intent
 
 class TaskReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val taskId = intent.getLongExtra(NotificationUtils.EXTRA_TASK_ID, 0L)
-        val title = intent.getStringExtra(NotificationUtils.EXTRA_TASK_TITLE) ?: "Task Reminder"
-        val category = intent.getStringExtra(NotificationUtils.EXTRA_TASK_CATEGORY) ?: "General"
+        val action = intent.action
+        if (action == NotificationUtils.ACTION_SLEEP_ALARM) {
+            val isWakeAlarm = intent.getBooleanExtra(NotificationUtils.EXTRA_IS_WAKE_ALARM, false)
+            NotificationUtils.showSleepAlarmNotification(context, isWakeAlarm)
+        } else {
+            val taskId = intent.getLongExtra(NotificationUtils.EXTRA_TASK_ID, 0L)
+            val title = intent.getStringExtra(NotificationUtils.EXTRA_TASK_TITLE) ?: "Task Reminder"
+            val category = intent.getStringExtra(NotificationUtils.EXTRA_TASK_CATEGORY) ?: "General"
 
-        NotificationUtils.showNotification(context, taskId, title, category)
+            NotificationUtils.showNotification(context, taskId, title, category)
+        }
     }
 }

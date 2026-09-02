@@ -1,5 +1,6 @@
 package com.example.ui.components
 
+import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -74,6 +75,7 @@ import java.util.Locale
 fun AddTaskBottomSheet(
     initialTask: TaskItem? = null,
     targetDate: String,
+    initialTime: String? = null,
     availableCategories: List<CategoryItem> = emptyList(),
     onDismiss: () -> Unit,
     onSaveTask: (
@@ -115,7 +117,7 @@ fun AddTaskBottomSheet(
         )
     }
     var dueDate by remember { mutableStateOf(initialTask?.dueDate ?: targetDate) }
-    var dueTime by remember { mutableStateOf(initialTask?.dueTime ?: "09:00") }
+    var dueTime by remember { mutableStateOf(initialTask?.dueTime ?: initialTime ?: "06:00") }
     var durationMinutes by remember { mutableIntStateOf(initialTask?.durationMinutes ?: 30) }
     var isStarred by remember { mutableStateOf(initialTask?.isStarred ?: false) }
     var reminderEnabled by remember { mutableStateOf(initialTask?.reminderEnabled ?: false) }
@@ -257,24 +259,62 @@ fun AddTaskBottomSheet(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Schedule & Time Blocking
-            Text("Schedule & Time Blocking", fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+            Text("Date & Time Schedule", fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
             Spacer(modifier = Modifier.height(8.dp))
 
+            // Date and Time picker buttons side-by-side
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // Time Picker Button
+                // Date Picker Button
                 Surface(
                     onClick = {
                         val cal = Calendar.getInstance()
+                        try {
+                            val parsedDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(dueDate)
+                            if (parsedDate != null) cal.time = parsedDate
+                        } catch (_: Exception) {}
+                        DatePickerDialog(
+                            context,
+                            { _, year, month, dayOfMonth ->
+                                dueDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, month + 1, dayOfMonth)
+                            },
+                            cal.get(Calendar.YEAR),
+                            cal.get(Calendar.MONTH),
+                            cal.get(Calendar.DAY_OF_MONTH)
+                        ).show()
+                    },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Default.DateRange, contentDescription = "Pick Date", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Column {
+                            Text("Date", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(text = dueDate, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+                        }
+                    }
+                }
+
+                // Time Picker Button
+                Surface(
+                    onClick = {
+                        val parts = dueTime.split(":")
+                        val initialHour = parts.getOrNull(0)?.toIntOrNull() ?: 6
+                        val initialMin = parts.getOrNull(1)?.toIntOrNull() ?: 0
                         TimePickerDialog(
                             context,
                             { _, hour, minute ->
                                 dueTime = String.format(Locale.getDefault(), "%02d:%02d", hour, minute)
                             },
-                            cal.get(Calendar.HOUR_OF_DAY),
-                            cal.get(Calendar.MINUTE),
+                            initialHour,
+                            initialMin,
                             true
                         ).show()
                     },
@@ -283,23 +323,52 @@ fun AddTaskBottomSheet(
                     color = MaterialTheme.colorScheme.surfaceVariant
                 ) {
                     Row(
-                        modifier = Modifier.padding(12.dp),
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(Icons.Default.AccessTime, contentDescription = "Time", tint = MaterialTheme.colorScheme.primary)
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(text = dueTime, fontWeight = FontWeight.Medium, fontSize = 14.sp)
+                        Icon(Icons.Default.AccessTime, contentDescription = "Pick Time", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Column {
+                            Text("Time", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(text = dueTime, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+                        }
                     }
                 }
+            }
 
-                // Duration Selector Chips
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Quick Time Shortcuts
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                listOf("06:00", "09:00", "12:00", "15:00", "18:00", "21:00").forEach { preset ->
+                    FilterChip(
+                        selected = dueTime == preset,
+                        onClick = { dueTime = preset },
+                        label = { Text(preset, fontSize = 11.sp) },
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            // Duration Selector Chips
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Duration:", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 val durations = listOf(15, 30, 45, 60, 90)
                 durations.forEach { d ->
                     FilterChip(
                         selected = durationMinutes == d,
                         onClick = { durationMinutes = d },
-                        label = { Text("${d}m") },
-                        shape = RoundedCornerShape(10.dp)
+                        label = { Text("${d}m", fontSize = 11.sp) },
+                        shape = RoundedCornerShape(8.dp)
                     )
                 }
             }

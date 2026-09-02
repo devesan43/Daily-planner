@@ -208,3 +208,21 @@ enum class AppTheme(val displayName: String, val primaryColor: Long, val seconda
     ROSE_GOLD("Aesthetic Rose", 0xFFDB2777, 0xFFF472B6, false),
     MIDNIGHT_AMOLED("Midnight Dark", 0xFF818CF8, 0xFFA78BFA, true)
 }
+
+data class SleepRecord(
+    val date: String, // yyyy-MM-dd
+    val bedtime: String, // e.g. "22:30"
+    val wakeTime: String, // e.g. "06:30"
+    val durationHours: Float, // e.g. 8.0f
+    val quality: String = "Good", // "Restful", "Energized", "Light", "Tired"
+    val notes: String = ""
+)
+
+data class SleepScheduleSettings(
+    val targetBedtime: String = "22:30",
+    val targetWakeTime: String = "06:30",
+    val bedtimeReminderEnabled: Boolean = true,
+    val wakeAlarmEnabled: Boolean = true,
+    val soundAlarmEnabled: Boolean = true
+)
+

@@ -67,7 +67,7 @@ fun CalendarScreen(
     val selectedDayTasks by viewModel.calendarSelectedDateTasks.collectAsState()
 
     var showAddTaskDialog by remember { mutableStateOf(false) }
-    var prefilledTime by remember { mutableStateOf("09:00") }
+    var prefilledTime by remember { mutableStateOf("06:00") }
 
     val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     val displayFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
@@ -95,8 +95,18 @@ fun CalendarScreen(
         list
     }
 
-    // Hourly Time Blocking: 06:00 to 22:00
-    val hours = (6..22).map { String.format(Locale.getDefault(), "%02d:00", it) }
+    // Hourly Time Blocking: 12:00 AM (00:00) to 11:00 PM (23:00) - Full 24 Hours
+    val hours = (0..23).map { String.format(Locale.getDefault(), "%02d:00", it) }
+
+    fun formatHourDisplay(hourStr: String): String {
+        val h = hourStr.split(":").getOrNull(0)?.toIntOrNull() ?: return hourStr
+        return when {
+            h == 0 -> "12 AM"
+            h < 12 -> "$h AM"
+            h == 12 -> "12 PM"
+            else -> "${h - 12} PM"
+        }
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         // Month Header & Date Navigation
@@ -263,13 +273,22 @@ fun CalendarScreen(
                     verticalAlignment = Alignment.Top
                 ) {
                     // Hour label
-                    Text(
-                        text = hourStr,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.width(48.dp)
-                    )
+                    Column(
+                        modifier = Modifier.width(62.dp),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        Text(
+                            text = formatHourDisplay(hourStr),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = hourStr,
+                            fontSize = 10.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        )
+                    }
 
                     // Slot content (Tasks or empty slot button)
                     if (tasksInSlot.isNotEmpty()) {
@@ -350,9 +369,9 @@ fun CalendarScreen(
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
-                                    text = "Plan $hourStr",
+                                    text = "Plan ${formatHourDisplay(hourStr)}",
                                     fontSize = 11.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                                 )
                             }
                         }
@@ -363,8 +382,11 @@ fun CalendarScreen(
     }
 
     if (showAddTaskDialog) {
+        val categories by viewModel.allCategories.collectAsState()
         AddTaskBottomSheet(
             targetDate = selectedDate,
+            initialTime = prefilledTime,
+            availableCategories = categories,
             onDismiss = { showAddTaskDialog = false },
             onSaveTask = { title, desc, cat, priority, dueDate, dueTime, duration, isStarred, reminder, recurrence, subtasks, sticker ->
                 viewModel.addTask(
@@ -372,7 +394,7 @@ fun CalendarScreen(
                     description = desc,
                     category = cat,
                     priority = priority,
-                    dueDate = selectedDate,
+                    dueDate = dueDate,
                     dueTime = dueTime ?: prefilledTime,
                     durationMinutes = duration,
                     isStarred = isStarred,
